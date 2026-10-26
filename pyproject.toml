@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "claude-sentinel"
+version = "1.0.0"
+description = "Cross-platform desktop application and background daemon for Claude telemetry and quota throttling."
+readme = "README.md"
+authors = [{ name = "Claude Sentinel Team" }]
+requires-python = ">=3.11"
+dependencies = [
+    "psutil>=5.9.0",
+    "PyQt6>=6.5.0",
+    "pyqtgraph>=0.13.0",
+    "cryptography>=41.0.0",
+    "requests>=2.31.0"
+]
+
+[project.scripts]
+claude-sentinel = "claude_sentinel.app:main"
+sentinel = "claude_sentinel.app:main"

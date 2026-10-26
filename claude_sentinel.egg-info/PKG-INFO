@@ -1,0 +1,97 @@
+Metadata-Version: 2.4
+Name: claude-sentinel
+Version: 1.0.0
+Summary: Cross-platform desktop application and background daemon for Claude telemetry and quota throttling.
+Author: Claude Sentinel Team
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: psutil>=5.9.0
+Requires-Dist: PyQt6>=6.5.0
+Requires-Dist: pyqtgraph>=0.13.0
+Requires-Dist: cryptography>=41.0.0
+Requires-Dist: requests>=2.31.0
+
+# Claude Sentinel 🛡️
+
+**Claude Sentinel** is an administrative telemetry dashboard and autonomous background daemon engineered to monitor and manage user interactions across both **Claude Chat (Web Interface)** and **Claude Code (CLI/Terminal)**.
+
+---
+
+## Key Features
+
+1. **Dual-Environment Detection**:
+   - **Claude Chat**: Real-time browser tab and window title inspection across Chrome, Edge, Firefox, Safari, Brave, Arc, identifying active `claude.ai/chat/*` sessions.
+   - **Claude Code**: Live terminal and IDE process scanning (`powershell`, `cmd`, `Terminal`, `iTerm`, `VS Code`, `Cursor`), paired with active JSONL session log tailing in `~/.claude/projects/*/*.jsonl`.
+2. **Precision Token Telemetry**:
+   - Extracts exact Model IDs (e.g. `claude-3-5-sonnet-20241022`, `claude-opus-5[1m]`, `claude-3-5-haiku`).
+   - Detailed metric breakdown: Input Tokens, Output Tokens, Cache Creation Tokens, Cache Retrieval Tokens, Total Tokens, and Estimated Cost in USD.
+3. **Hard Limit & Quota Enforcement**:
+   - Hourly/Daily token ceilings, daily dollar budgets ($), and hourly call rate limits.
+   - **Throttling Actions**:
+     - **Claude Code**: Automatically terminates or suspends `claude` CLI sub-processes and writes an overt alert banner to `~/.claude/LIMIT_EXCEEDED_WARNING.txt`.
+     - **Claude Chat**: Triggers a persistent floating HUD alert banner (`AlertOverlay`) and optionally blocks HTTP/HTTPS routing at the local proxy gate.
+4. **PyQt6 Dark Administrative Dashboard**:
+   - Sleek cyberpunk / dark console palette (`#0f1015`, `#161822`, `#00d2d3`, `#a55eea`, `#4cd137`).
+   - Real-time pulse indicator showing active state (Claude Chat vs Claude Code vs Idle).
+   - Live token burn-rate graph powered by `pyqtgraph`.
+   - Dynamic quota progress bar with automatic green -> amber -> red color grading.
+   - Real-time 2-second activity timeline stream.
+   - System tray minimization.
+5. **Security & Persistence**:
+   - SQLite3 with WAL (Write-Ahead Logging) mode and thread-safe pooled connections.
+   - Hardware-bound symmetric key encryption (PBKDF2 + AES-GCM) for Anthropic API keys and session tokens.
+
+---
+
+## Architecture Blueprint
+
+```
+claude_sentinel/
+├── __init__.py
+├── app.py                 # Application lifecycle (GUI & Headless runner)
+├── database.py            # SQLite3 engine with WAL mode and CRUD operations
+├── auth.py                # Anthropic API & encrypted credential manager
+├── activity_tracker.py    # 2s foreground window & process classifier
+├── token_monitor.py       # Claude Code JSONL tailer & token parser
+├── network_proxy.py       # Loopback HTTP/HTTPS proxy (127.0.0.1:8899)
+├── quota_manager.py       # Hard limits evaluator & process enforcer
+├── window_detector.py     # Cross-platform active window / browser URL detector
+├── alert_overlay.py       # Top-level floating quota breach warning banner
+├── pricing.py             # Anthropic model token & prompt cache pricing
+└── gui.py                 # PyQt6 dark administrative dashboard
+```
+
+---
+
+## How to Test and Verify
+
+### Method 1: Run the Automated Unit Test Suite
+Execute the complete test suite covering database transactions, activity classification, JSONL log parsing, token pricing, and quota breach actions:
+```powershell
+$env:PYTHONPATH="c:\Users\ADMIN\Desktop\CODE\claude_sentinel"; python -m unittest discover -s c:\Users\ADMIN\Desktop\CODE\claude_sentinel\tests -v
+```
+
+### Method 2: Run the Live Verification & Simulation Script
+This runs a simulated end-to-end lifecycle, appending mock Claude Code JSONL events, ingesting Web Chat payloads, updating quotas, and verifying SQLite metric aggregations:
+```powershell
+python c:\Users\ADMIN\Desktop\CODE\claude_sentinel\verify_simulation.py
+```
+
+### Method 3: Test Headless Daemon Mode
+Test the background daemon in headless mode for a 6-second verification burst:
+```powershell
+python c:\Users\ADMIN\Desktop\CODE\claude_sentinel\run_sentinel.py --test-headless
+```
+
+### Method 4: Launch the GUI Administrative Dashboard
+Launch the full PyQt6 administrative dashboard:
+```powershell
+python c:\Users\ADMIN\Desktop\CODE\claude_sentinel\run_sentinel.py
+```
+
+---
+
+## Database File Location
+The SQLite database and cryptographic salt are automatically maintained in:
+- Windows: `%USERPROFILE%\.claude_sentinel\sentinel.db`
+- macOS/Linux: `~/.claude_sentinel/sentinel.db`

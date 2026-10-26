@@ -1,0 +1,3 @@
+[console_scripts]
+claude-sentinel = claude_sentinel.app:main
+sentinel = claude_sentinel.app:main

@@ -1,0 +1,5 @@
+psutil>=5.9.0
+PyQt6>=6.5.0
+pyqtgraph>=0.13.0
+cryptography>=41.0.0
+requests>=2.31.0
